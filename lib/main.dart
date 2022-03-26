@@ -9,9 +9,8 @@ import 'core/services/notification_services.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
-  // LocalNotification.instance.init();
-  // await AndroidAlarmManager.initialize();
+  LocalNotification.instance.init();
+  await AndroidAlarmManager.initialize();
   runApp(const MyApp());
 }
 
@@ -23,6 +22,9 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
+        ChangeNotifierProvider.value(
+          value: PatientProvider(),
+        ),
         ChangeNotifierProvider.value(
           value: OrientationProvider(),
         ),

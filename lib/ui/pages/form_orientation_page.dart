@@ -28,13 +28,21 @@ class _FormOrientationPageState extends State<FormOrientationPage> {
       pController.text = widget.old!.p;
       qController.text = widget.old!.q;
       rController.text = widget.old!.r;
-      sController.text = widget.old!.s;
+      sController.text = widget.old!.s.toString();
       tController.text = widget.old!.t;
-      managementController.text = widget.old!.management;
+      selectedManagement = widget.old!.management;
+      managementController.text = widget.old!.ketManagement;
     }
 
     super.initState();
   }
+
+  List<String> managements = [
+    'Non Farmakologis',
+    'Farmakologis',
+  ];
+
+  String? selectedManagement;
 
   @override
   Widget build(BuildContext context) {
@@ -102,6 +110,7 @@ class _FormOrientationPageState extends State<FormOrientationPage> {
                 SizedBox(height: 10),
                 TextFormField(
                   controller: sController,
+                  keyboardType: TextInputType.numberWithOptions(),
                   decoration: decorationForm.copyWith(labelText: 'S (Skala)'),
                   validator: (value) {
                     if (value!.isEmpty) {
@@ -119,16 +128,56 @@ class _FormOrientationPageState extends State<FormOrientationPage> {
                     }
                   },
                 ),
-                TextFormField(
-                  controller: managementController,
+                SizedBox(height: 10),
+                DropdownButtonFormField<String>(
+                  value: selectedManagement,
+                  isExpanded: true,
+                  items: managements
+                      .map((e) => DropdownMenuItem<String>(
+                            child: Container(
+                              child: Text(
+                                e,
+                                style: TextStyle(
+                                    fontSize: 14, fontWeight: FontWeight.w500),
+                              ),
+                            ),
+                            value: e,
+                          ))
+                      .toList(),
                   decoration: decorationForm.copyWith(
-                      labelText: 'Manajemen Pengkajian'),
+                    labelText: 'Manajemen Nyeri',
+                    hintText: 'Pilih Manajemen Nyeri',
+                  ),
+                  onChanged: (value) {
+                    setState(() {
+                      selectedManagement = value;
+                    });
+                  },
                   validator: (value) {
                     if (value!.isEmpty) {
-                      return 'Tidak boleh kosong';
+                      return 'Harus diisi';
                     }
                   },
+                  autovalidateMode: AutovalidateMode.onUserInteraction,
                 ),
+                SizedBox(height: 10),
+                Builder(builder: (context) {
+                  if (selectedManagement == null) {
+                    return SizedBox();
+                  }
+                  return TextFormField(
+                    controller: managementController,
+                    maxLines: 4,
+                    keyboardType: TextInputType.multiline,
+                    decoration: decorationForm.copyWith(
+                        labelText: 'Ket. Manajemen Nyeri'),
+                    validator: (value) {
+                      if (value!.isEmpty) {
+                        return 'Tidak boleh kosong';
+                      }
+                    },
+                  );
+                }),
                 SizedBox(height: 10),
                 SizedBox(
                   height: 200,
@@ -151,17 +200,29 @@ class _FormOrientationPageState extends State<FormOrientationPage> {
           height: 60,
           onPressed: () {
             if (_formKey.currentState!.validate()) {
+              var now = DateTime.now();
+
               Provider.of<OrientationProvider>(context, listen: false)
                   .saveDataOrientation(
-                patient: widget.patient,
                 oldData: widget.old,
                 newData: OrientationPainful(
-                    p: pController.text,
-                    q: qController.text,
-                    r: rController.text,
-                    s: sController.text,
-                    t: tController.text,
-                    management: managementController.text),
+                  userId: widget.patient!.userId,
+                  p: pController.text,
+                  q: qController.text,
+                  r: rController.text,
+                  s: double.parse(sController.text),
+                  t: tController.text,
+                  management: selectedManagement!,
+                  ketManagement: managementController.text,
+                  createdAt: now,
+                  release: now.add(
+                    Duration(
+                      minutes: getMinuteRelease(
+                        double.parse(sController.text),
+                      ),
+                    ),
+                  ),
+                ),
               );
               Navigator.pop(context);
             }

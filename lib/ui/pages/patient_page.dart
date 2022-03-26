@@ -35,9 +35,22 @@ class _PatientPageState extends State<PatientPage> {
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => NotificationPage(null),
+                ),
+              );
+            },
+            icon: Icon(Icons.notifications),
+          ),
+        ],
       ),
-      body: Consumer<OrientationProvider>(
-        builder: (context, prov, _) {
+      body: Consumer2<PatientProvider, OrientationProvider>(
+        builder: (context, prov, orien, _) {
           return Container(
             margin: EdgeInsets.fromLTRB(10, 10, 10, 20),
             decoration: BoxDecoration(
@@ -88,14 +101,13 @@ class _PatientPageState extends State<PatientPage> {
                     )
                   ],
                   rows: prov.patients.map((data) {
-                    // var lastPasien = prov.lastPasien();
-                    // int index = prov.pasien.indexOf(data);
+                    var lastUserId = orien.lastAlarmPatient();
                     return DataRow(
-                        // color: lastPasien == data
-                        //     ? MaterialStateColor.resolveWith(
-                        //         (states) => Colors.red[200]!)
-                        //     : MaterialStateColor.resolveWith(
-                        //         (states) => Colors.transparent),
+                        color: lastUserId == data.userId
+                            ? MaterialStateColor.resolveWith(
+                                (states) => Colors.red[200]!)
+                            : MaterialStateColor.resolveWith(
+                                (states) => Colors.transparent),
                         onLongPress: () {
                           Navigator.push(
                             context,

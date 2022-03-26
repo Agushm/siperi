@@ -5,8 +5,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
 import '../../utils/dialog_utils.dart';
+import '../../utils/string_converter.dart';
 import '../constants/theme.dart';
 import '../widgets/widgets.dart';
+import 'notification_page.dart';
 
 part 'main_page.dart';
 part 'home_page.dart';

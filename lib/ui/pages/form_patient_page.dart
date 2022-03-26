@@ -112,14 +112,17 @@ class _FormPatientPageState extends State<FormPatientPage> {
           height: 60,
           onPressed: () {
             if (_formKey.currentState!.validate()) {
-              Provider.of<OrientationProvider>(context, listen: false)
+              Provider.of<PatientProvider>(context, listen: false)
                   .saveDataPatient(
                 widget.old,
                 Patient(
-                    noRm: noRmController.text,
-                    pasien: pasienController.text,
-                    perawat: perawatController.text,
-                    orientations: orientations),
+                  userId: widget.old == null
+                      ? DateTime.now().millisecondsSinceEpoch.toString()
+                      : widget.old!.userId,
+                  noRm: noRmController.text,
+                  pasien: pasienController.text,
+                  perawat: perawatController.text,
+                ),
               );
               Navigator.pop(context);
             }

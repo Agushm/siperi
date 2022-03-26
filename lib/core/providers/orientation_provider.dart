@@ -7,83 +7,110 @@ class OrientationProvider extends ChangeNotifier {
     init();
   }
   void init() async {
-    var local = await LocalStorage.instance.getData('patients');
+    var local = await LocalStorage.instance.getData('orientations');
     if (local != null) {
-      List<Patient> load = [];
+      List<OrientationPainful> load = [];
       var d = json.decode(local);
       d.forEach((e) {
-        load.add(Patient.fromJson(e));
+        load.add(OrientationPainful.fromJson(e));
       });
-      _patients = load;
-      notifyListeners();
+      _orientations = load;
+      addPendingAlarm();
     }
 
-    print("Local Storage: $local");
+    print("Orientations: $local");
   }
 
-  List<Patient> _patients = [];
-  // List.generate(
-  //   20,
-  //   (index) => Patient(
-  //     pasien: 'Pasien $index',
-  //     perawat: 'Perawat $index',
-  //     noRm: 'RM $index',
-  //     orientations: List.generate(
-  //       20,
-  //       (index) => OrientationPainful(
-  //           p: 'P $index',
-  //           q: 'Q $index',
-  //           r: 'R $index',
-  //           s: 'S $index',
-  //           t: 'T $index',
-  //           management: 'Non Farmakologis'),
-  //     ),
-  //   ),
-  // );
-  List<Patient> get patients => _patients;
+  List<OrientationPainful> _orientations = [];
 
-  void saveDataPatient(Patient? oldData, Patient? newData) {
-    if (oldData == null) {
-      _patients.add(newData!);
-    } else {
-      int index = _patients.indexOf(oldData);
-      _patients[index] = newData!;
+  List<OrientationPainful> get orientations => _orientations;
+
+  String? lastAlarmPatient() {
+    List<OrientationPainful> _load = [];
+    _orientations.forEach((e) async {
+      var isBefore = e.release.isBefore(DateTime.now());
+      if (isBefore) {
+        _load.add(e);
+      }
+    });
+    if (_load.isEmpty) {
+      return null;
     }
-    savePatientsToLocalStorage();
-    notifyListeners();
+    _load.sort((a, b) => a.release.compareTo(b.release));
+    return _load.last.userId;
   }
 
-  void deleteDataPatient(Patient? data) {
-    _patients.remove(data);
-    savePatientsToLocalStorage();
-    notifyListeners();
-  }
-
-  void savePatientsToLocalStorage() async {
-    await LocalStorage.instance.saveData(
-        'patients', json.encode(_patients.map((e) => e.toJson()).toList()));
+  List<OrientationPainful> orientationsByUserId(String userId) {
+    return _orientations.where((e) => e.userId == userId).toList();
   }
 
   void saveDataOrientation({
-    Patient? patient,
     OrientationPainful? oldData,
     OrientationPainful? newData,
   }) {
-    int index = _patients.indexOf(patient!);
     if (oldData == null) {
-      _patients[index].orientations.add(newData!);
+      _orientations.add(newData!);
     } else {
-      int indexOrientation = _patients[index].orientations.indexOf(oldData);
-      _patients[index].orientations[indexOrientation] = newData!;
+      int index = _orientations.indexOf(oldData);
+      _orientations[index] = newData!;
     }
-    savePatientsToLocalStorage();
+    saveOrientationsToLocalStorage();
     notifyListeners();
   }
 
-  void deleteDataOrientation({Patient? patient, OrientationPainful? data}) {
-    var index = _patients.indexOf(patient!);
-    _patients[index].orientations.remove(data!);
-    savePatientsToLocalStorage();
+  void deleteDataOrientation({OrientationPainful? data}) {
+    _orientations.remove(data!);
+    saveOrientationsToLocalStorage();
     notifyListeners();
   }
+
+  void saveOrientationsToLocalStorage() async {
+    await LocalStorage.instance.saveData('orientations',
+        json.encode(_orientations.map((e) => e.toJson()).toList()));
+    addPendingAlarm();
+  }
+
+  Future addPendingAlarm() async {
+    _orientations.forEach((e) async {
+      int index = _orientations.indexOf(e);
+      var isAfter = e.release.isAfter(DateTime.now());
+      if (isAfter) {
+        await _addScheduledAlarm(index, e);
+      }
+      print('Orientation Selisih isBefore=${isAfter}');
+    });
+  }
+
+  Future _addScheduledAlarm(int index, OrientationPainful data) async {
+    AndroidAlarmManager.oneShotAt(data.release, index, showNotifOrientation,
+        alarmClock: true, allowWhileIdle: true, wakeup: true);
+  }
+}
+
+void showNotifOrientation() async {
+  final DateTime now = DateTime.now();
+
+  final Int64List vibrationPattern = Int64List(4);
+  vibrationPattern[0] = 0;
+  vibrationPattern[1] = 1000;
+  vibrationPattern[2] = 5000;
+  vibrationPattern[3] = 2000;
+  AndroidNotificationDetails androidPlatformChannelSpecifics =
+      AndroidNotificationDetails(
+    'your other channel id',
+    'your other channel name',
+    channelDescription: 'your other channel description',
+    sound: RawResourceAndroidNotificationSound('ringtone'),
+    enableVibration: true,
+    importance: Importance.max,
+    priority: Priority.high,
+    vibrationPattern: vibrationPattern,
+  );
+
+  LocalNotification.flutterLocalNotificationsPlugin.show(
+    0,
+    'Waktunya Pengkajian Nyeri Ulang',
+    '${DateFormat('EEEE, dd-MM-yyyy HH:mm WIB').format(now)}',
+    NotificationDetails(android: androidPlatformChannelSpecifics),
+  );
 }

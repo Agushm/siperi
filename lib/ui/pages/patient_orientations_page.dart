@@ -102,7 +102,28 @@ class _PatientOrientationsPageState extends State<PatientOrientationsPage> {
                       DataColumn(
                         label: Center(
                           child: Text(
-                            "Manajemen Pengkajian",
+                            "Manajemen Neri",
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Center(
+                          child: Text(
+                            "Ket. Manajemen Neri",
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Center(
+                          child: Text(
+                            "Dibuat",
+                          ),
+                        ),
+                      ),
+                      DataColumn(
+                        label: Center(
+                          child: Text(
+                            "Pengkajian Ulang",
                           ),
                         ),
                       ),
@@ -115,93 +136,109 @@ class _PatientOrientationsPageState extends State<PatientOrientationsPage> {
                         ),
                       )
                     ],
-                    rows: widget.patient!.orientations.map((data) {
-                      // var lastPasien = prov.lastPasien();
-                      // int index = prov.pasien.indexOf(data);
-                      return DataRow(
-                          // color: lastPasien == data
-                          //     ? MaterialStateColor.resolveWith(
-                          //         (states) => Colors.red[200]!)
-                          //     : MaterialStateColor.resolveWith(
-                          //         (states) => Colors.transparent),
-                          onLongPress: () {},
-                          cells: [
-                            DataCell(
-                              Text(data.p),
-                            ),
-                            DataCell(
-                              Text(data.q),
-                            ),
-                            DataCell(
-                              Text(data.r),
-                            ),
-                            DataCell(
-                              Text(data.s),
-                            ),
-                            DataCell(
-                              Text(data.t),
-                            ),
-                            DataCell(
-                              Text(data.management),
-                            ),
-                            DataCell(
-                              Row(
-                                children: [
-                                  MaterialButton(
-                                    color: Colors.blue,
-                                    onPressed: () async {
-                                      Navigator.push(
-                                          context,
-                                          MaterialPageRoute(
-                                              builder: (_) =>
-                                                  FormOrientationPage(
-                                                      patient: widget.patient,
-                                                      old: data)));
-                                    },
-                                    child: Row(
-                                      children: const [
-                                        Icon(Icons.edit,
-                                            color: Colors.white, size: 12),
-                                        SizedBox(width: 5),
-                                        Text(
-                                          'Edit',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                  SizedBox(width: 5),
-                                  MaterialButton(
-                                    color: Colors.red,
-                                    onPressed: () async {
-                                      var confirm = await DialogUtils.instance
-                                          .showConfirmDialog(
-                                              context,
-                                              'Hapus Kategori',
-                                              'Anda yakin ingin menghapus data ini?');
-                                      if (confirm!) {
-                                        prov.deleteDataOrientation(
-                                            patient: widget.patient,
-                                            data: data);
-                                      }
-                                    },
-                                    child: Row(
-                                      children: const [
-                                        Icon(Icons.close,
-                                            color: Colors.white, size: 12),
-                                        SizedBox(width: 5),
-                                        Text(
-                                          'Hapus',
-                                          style: TextStyle(color: Colors.white),
-                                        ),
-                                      ],
-                                    ),
-                                  ),
-                                ],
+                    rows: prov.orientationsByUserId(widget.patient!.userId).map(
+                      (data) {
+                        // var lastPasien = prov.lastPasien();
+                        // int index = prov.pasien.indexOf(data);
+                        return DataRow(
+                            // color: lastPasien == data
+                            //     ? MaterialStateColor.resolveWith(
+                            //         (states) => Colors.red[200]!)
+                            //     : MaterialStateColor.resolveWith(
+                            //         (states) => Colors.transparent),
+                            onLongPress: () {},
+                            cells: [
+                              DataCell(
+                                Text(data.p),
                               ),
-                            )
-                          ]);
-                    }).toList(),
+                              DataCell(
+                                Text(data.q),
+                              ),
+                              DataCell(
+                                Text(data.r),
+                              ),
+                              DataCell(
+                                Text(data.s.toString()),
+                              ),
+                              DataCell(
+                                Text(data.t),
+                              ),
+                              DataCell(
+                                Text(data.management),
+                              ),
+                              DataCell(
+                                Text(data.ketManagement),
+                              ),
+                              DataCell(
+                                Text(
+                                  formatDate.format(data.createdAt),
+                                ),
+                              ),
+                              DataCell(
+                                Text(
+                                  formatDate.format(data.release),
+                                ),
+                              ),
+                              DataCell(
+                                Row(
+                                  children: [
+                                    MaterialButton(
+                                      color: Colors.blue,
+                                      onPressed: () async {
+                                        Navigator.push(
+                                            context,
+                                            MaterialPageRoute(
+                                                builder: (_) =>
+                                                    FormOrientationPage(
+                                                        patient: widget.patient,
+                                                        old: data)));
+                                      },
+                                      child: Row(
+                                        children: const [
+                                          Icon(Icons.edit,
+                                              color: Colors.white, size: 12),
+                                          SizedBox(width: 5),
+                                          Text(
+                                            'Edit',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SizedBox(width: 5),
+                                    MaterialButton(
+                                      color: Colors.red,
+                                      onPressed: () async {
+                                        var confirm = await DialogUtils.instance
+                                            .showConfirmDialog(
+                                                context,
+                                                'Hapus Kategori',
+                                                'Anda yakin ingin menghapus data ini?');
+                                        if (confirm!) {
+                                          prov.deleteDataOrientation(
+                                              data: data);
+                                        }
+                                      },
+                                      child: Row(
+                                        children: const [
+                                          Icon(Icons.close,
+                                              color: Colors.white, size: 12),
+                                          SizedBox(width: 5),
+                                          Text(
+                                            'Hapus',
+                                            style:
+                                                TextStyle(color: Colors.white),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              )
+                            ]);
+                      },
+                    ).toList(),
                   ),
                 ),
               ),
