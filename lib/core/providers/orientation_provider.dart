@@ -110,7 +110,7 @@ void showNotifOrientation() async {
   LocalNotification.flutterLocalNotificationsPlugin.show(
     0,
     'Waktunya Pengkajian Nyeri Ulang',
-    '${DateFormat('EEEE, dd-MM-yyyy HH:mm WIB').format(now)}',
+    '${DateFormat('EEEE, dd-MM-yyyy HH:mm WIB', 'id_ID').format(now)}',
     NotificationDetails(android: androidPlatformChannelSpecifics),
   );
 }
