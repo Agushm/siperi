@@ -36,17 +36,17 @@ class _PatientPageState extends State<PatientPage> {
           ],
         ),
         actions: [
-          IconButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => NotificationPage(null),
-                ),
-              );
-            },
-            icon: Icon(Icons.notifications),
-          ),
+          // IconButton(
+          //   onPressed: () {
+          //     Navigator.push(
+          //       context,
+          //       MaterialPageRoute(
+          //         builder: (context) => NotificationPage(null),
+          //       ),
+          //     );
+          //   },
+          //   icon: Icon(Icons.notifications),
+          // ),
         ],
       ),
       body: Consumer2<PatientProvider, OrientationProvider>(

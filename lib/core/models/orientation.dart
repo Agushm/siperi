@@ -54,12 +54,14 @@ class OrientationPainful {
 }
 
 int getMinuteRelease(double s) {
-  if (s >= 1) {
-    return 1;
-  } else if (s >= 4) {
+  if (s == 123) {
     return 2;
-  } else if (s >= 7) {
-    return 3;
+  } else if (s >= 1 && s < 4) {
+    return 8 * 60;
+  } else if (s >= 4 && s < 7) {
+    return 4 * 60;
+  } else if (s >= 7 && s < 10) {
+    return 60;
   } else {
     return 0;
   }
